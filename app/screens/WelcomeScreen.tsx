@@ -1,45 +1,34 @@
-import React, { useState } from "react"
+import React, { useContext, useEffect } from "react"
 
-import { useNavigation } from "@react-navigation/native"
 import { HorizontalSlider, MoviePosteer } from "app/components"
 import { GradientBackground } from "app/components/GradientBackground"
 import { useMovies } from "app/hooks/useMovies"
 
-import ImageColors from "react-native-image-colors"
-
-import {
-  ActivityIndicator,
-  Button,
-  SafeAreaView,
-  Text,
-  View,
-  Dimensions,
-  FlatList,
-  ScrollView,
-} from "react-native"
+import { ActivityIndicator, View, Dimensions, ScrollView } from "react-native"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import Carousel from "react-native-snap-carousel"
 import { getColors } from "app/helpers/getColors"
-
+import { GradientContext } from "app/context/GradientContext"
 
 const { width: windowWidth } = Dimensions.get("window")
 
 export const WelcomeScreen = () => {
-  const navigator = useNavigation()
-
   const { nowPlaying, isLoading, popular, topRated, upcoming } = useMovies()
   const { top } = useSafeAreaInsets()
+  const { setMainColors } = useContext(GradientContext)
 
   const getPosterColors = async (index: number) => {
     const movie = nowPlaying[index]
     const uri = `https://image.tmdb.org/t/p/w500${movie.poster_path}`
-    const [primary, secondary] = await getColors(uri)
-
-    console.log(primary, secondary)
+    const [primary = "green", secondary = "orange"] = await getColors(uri)
+    setMainColors({ primary, secondary })
   }
 
-
-
+  useEffect(() => {
+    if (nowPlaying.length > 0) {
+      getPosterColors(0)
+    }
+  }, [nowPlaying])
 
   if (isLoading) {
     return (
